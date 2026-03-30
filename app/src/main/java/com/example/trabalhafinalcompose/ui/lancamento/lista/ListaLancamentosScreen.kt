@@ -5,10 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,6 +21,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ThumbDownOffAlt
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -173,42 +177,68 @@ private fun List(
     lancamentos: List<Lancamento>,
     onLancamentoPressed: (Lancamento) -> Unit
 ) {
-    LazyColumn(modifier = modifier) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(all = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         items(lancamentos) { lancamento ->
-            ListItem(
-                modifier = Modifier.clickable { onLancamentoPressed(lancamento) },
-                leadingContent = {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onLancamentoPressed(lancamento) },
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp), // Espaçamento interno do card
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     val corIcone = if (lancamento.tipo == TipoLancamentoEnum.DESPESA) Color(0xFFCF5355) else Color(0xFF00984E)
                     val icone = if (lancamento.paga) Icons.Filled.ThumbUp else Icons.Filled.ThumbDownOffAlt
                     Icon(
                         imageVector = icone,
                         contentDescription = null,
-                        tint = corIcone
+                        tint = corIcone,
+                        modifier = Modifier.padding(end = 16.dp)
                     )
-                },
-                headlineContent = { Text(lancamento.descricao) },
-                supportingContent = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+
+                    Column(
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text(text = lancamento.data.formatar())
-
-                        val valorExibicao = if (lancamento.tipo == TipoLancamentoEnum.DESPESA) {
-                            lancamento.valor.negate()
-                        } else {
-                            lancamento.valor
-                        }
-
-                        val corValor = if (lancamento.tipo == TipoLancamentoEnum.DESPESA) Color(0xFFCF5355) else Color(0xFF00984E)
-
-                        Text (
-                            text = valorExibicao.formatar(),
-                            color = corValor
+                        Text(
+                            text = lancamento.descricao,
+                            style = MaterialTheme.typography.titleMedium
                         )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = lancamento.data.formatar(),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+
+                            val valorExibicao = if (lancamento.tipo == TipoLancamentoEnum.DESPESA) {
+                                lancamento.valor.negate()
+                            } else {
+                                lancamento.valor
+                            }
+
+                            val corValor = if (lancamento.tipo == TipoLancamentoEnum.DESPESA) Color(0xFFCF5355) else Color(0xFF00984E)
+
+                            Text (
+                                text = valorExibicao.formatar(),
+                                color = corValor,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 }
-            )
+            }
         }
     }
 }
