@@ -11,6 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,7 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.trabalhafinalcompose.R
 import com.example.trabalhafinalcompose.data.TipoLancamentoEnum
+import com.example.trabalhafinalcompose.ui.lancamento.form.composables.ConfirmationDialog
 import com.example.trabalhafinalcompose.ui.lancamento.form.composables.FormCheckbox
+import com.example.trabalhafinalcompose.ui.lancamento.form.composables.FormFieldRow
 import com.example.trabalhafinalcompose.ui.lancamento.form.composables.FormRadioButton
 import com.example.trabalhafinalcompose.ui.lancamento.form.composables.FormTextField
 import com.example.trabalhafinalcompose.ui.shared.composables.Carregando
@@ -74,6 +78,17 @@ fun FormularioLancamentoScreen(
             onTryAgainPressed = viewModel::carregarLancamento
         )
     } else {
+        if (viewModel.state.mostrarDialogConfirmacao) {
+            ConfirmationDialog(
+                title = stringResource(R.string.atencao),
+                text = stringResource(R.string.mensagem_confirmacao_remover_lancamento),
+                onDismiss = viewModel::ocultarDialogConfirmacao,
+                onConfirm = {
+                    viewModel.ocultarDialogConfirmacao()
+                    viewModel.removerLancamento()
+                }
+            )
+        }
         Scaffold(
             modifier = contentModifier,
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -83,7 +98,7 @@ fun FormularioLancamentoScreen(
                     processando = viewModel.state.salvando || viewModel.state.excluindo,
                     onVoltarPressed = onVoltarPressed,
                     onSalvarPressed = viewModel::salvarLancamento,
-                    onExcluirPressed = viewModel::removerLancamento
+                    onExcluirPressed = viewModel::mostrarDialogConfirmacao
                 )
             }
         ) { paddingValues ->
@@ -204,64 +219,86 @@ private fun FormContent(
         val formTextFieldModifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-        FormTextField(
-            modifier = formTextFieldModifier,
+        FormFieldRow(
             label = stringResource(R.string.descricao),
-            value = descricao.valor,
-            errorMessageCode = descricao.codigoMensagemErro,
-            onValueChanged = onDescricaoAlterada,
-            keyboardCapitalization = KeyboardCapitalization.Words,
-            enabled = !processando
-        )
-        FormTextField(
-            modifier = formTextFieldModifier,
+            imageVector = Icons.AutoMirrored.Filled.Notes
+        ) {
+            FormTextField(
+                modifier = formTextFieldModifier,
+                label = stringResource(R.string.descricao),
+                value = descricao.valor,
+                errorMessageCode = descricao.codigoMensagemErro,
+                onValueChanged = onDescricaoAlterada,
+                keyboardCapitalization = KeyboardCapitalization.Words,
+                enabled = !processando
+            )
+        }
+        FormFieldRow(
             label = stringResource(R.string.valor),
-            value = valor.valor,
-            errorMessageCode = valor.codigoMensagemErro,
-            onValueChanged = onValorAlterado,
-            keyboardType = KeyboardType.Number,
-            enabled = !processando
-        )
-        FormTextField(
-            modifier = formTextFieldModifier,
+            imageVector = Icons.Filled.AttachMoney
+        ) {
+            FormTextField(
+                modifier = formTextFieldModifier,
+                label = stringResource(R.string.valor),
+                value = valor.valor,
+                errorMessageCode = valor.codigoMensagemErro,
+                onValueChanged = onValorAlterado,
+                keyboardType = KeyboardType.Number,
+                enabled = !processando
+            )
+        }
+        FormFieldRow(
             label = stringResource(R.string.data),
-            value = data.valor,
-            errorMessageCode = data.codigoMensagemErro,
-            onValueChanged = onDataAlterada,
-            keyboardType = KeyboardType.Number,
-            enabled = !processando
-        )
+        ) {
+            FormTextField(
+                modifier = formTextFieldModifier,
+                label = stringResource(R.string.data),
+                value = data.valor,
+                errorMessageCode = data.codigoMensagemErro,
+                onValueChanged = onDataAlterada,
+                keyboardType = KeyboardType.Number,
+                enabled = !processando
+            )
+        }
         val checkOptionsModifier = Modifier.padding(vertical = 8.dp)
-        FormCheckbox(
-            modifier = checkOptionsModifier,
+        FormFieldRow(
             label = stringResource(R.string.paga),
-            checked = paga.valor.toBoolean(),
-            onCheckChanged = { newValue ->
-                onStatusPagamentoAlterado(newValue.toString())
-            },
-            enabled = !processando
-        )
-        Row {
-            FormRadioButton(
+        ) {
+            FormCheckbox(
                 modifier = checkOptionsModifier,
-                value = TipoLancamentoEnum.DESPESA,
-                groupValue = TipoLancamentoEnum.valueOf(tipo.valor),
-                onValueChanged = { newValue ->
-                    onTipoAlterado(newValue.toString())
+                label = stringResource(R.string.paga),
+                checked = paga.valor.toBoolean(),
+                onCheckChanged = { newValue ->
+                    onStatusPagamentoAlterado(newValue.toString())
                 },
-                label = stringResource(R.string.despesa),
                 enabled = !processando
             )
-            FormRadioButton(
-                modifier = checkOptionsModifier,
-                value = TipoLancamentoEnum.RECEITA,
-                groupValue = TipoLancamentoEnum.valueOf(tipo.valor),
-                onValueChanged = { newValue ->
-                    onTipoAlterado(newValue.toString())
-                },
-                label = stringResource(R.string.receita),
-                enabled = !processando
-            )
+        }
+        FormFieldRow(
+            label = stringResource(R.string.tipo),
+        ){
+            Row {
+                FormRadioButton(
+                    modifier = checkOptionsModifier,
+                    value = TipoLancamentoEnum.DESPESA,
+                    groupValue = TipoLancamentoEnum.valueOf(tipo.valor),
+                    onValueChanged = { newValue ->
+                        onTipoAlterado(newValue.toString())
+                    },
+                    label = stringResource(R.string.despesa),
+                    enabled = !processando
+                )
+                FormRadioButton(
+                    modifier = checkOptionsModifier,
+                    value = TipoLancamentoEnum.RECEITA,
+                    groupValue = TipoLancamentoEnum.valueOf(tipo.valor),
+                    onValueChanged = { newValue ->
+                        onTipoAlterado(newValue.toString())
+                    },
+                    label = stringResource(R.string.receita),
+                    enabled = !processando
+                )
+            }
         }
     }
 }
