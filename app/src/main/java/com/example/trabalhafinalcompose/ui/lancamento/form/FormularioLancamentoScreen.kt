@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,12 +41,14 @@ import com.example.trabalhafinalcompose.R
 import com.example.trabalhafinalcompose.data.TipoLancamentoEnum
 import com.example.trabalhafinalcompose.ui.lancamento.form.composables.ConfirmationDialog
 import com.example.trabalhafinalcompose.ui.lancamento.form.composables.FormCheckbox
+import com.example.trabalhafinalcompose.ui.lancamento.form.composables.FormDatePicker
 import com.example.trabalhafinalcompose.ui.lancamento.form.composables.FormFieldRow
 import com.example.trabalhafinalcompose.ui.lancamento.form.composables.FormRadioButton
 import com.example.trabalhafinalcompose.ui.lancamento.form.composables.FormTextField
 import com.example.trabalhafinalcompose.ui.shared.composables.Carregando
 import com.example.trabalhafinalcompose.ui.shared.composables.ErroAoCarregar
 import com.example.trabalhafinalcompose.ui.theme.TrabalhaFinalComposeTheme
+import java.time.LocalDate
 
 @Composable
 fun FormularioLancamentoScreen(
@@ -249,14 +252,14 @@ private fun FormContent(
         }
         FormFieldRow(
             label = stringResource(R.string.data),
+            imageVector = Icons.Filled.DateRange
         ) {
-            FormTextField(
+            FormDatePicker(
                 modifier = formTextFieldModifier,
                 label = stringResource(R.string.data),
-                value = data.valor,
+                value = LocalDate.parse(data.valor),
                 errorMessageCode = data.codigoMensagemErro,
-                onValueChanged = onDataAlterada,
-                keyboardType = KeyboardType.Number,
+                onValueChanged = { onDataAlterada(it.toString()) },
                 enabled = !processando
             )
         }
